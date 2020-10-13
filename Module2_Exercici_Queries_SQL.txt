@@ -1,0 +1,59 @@
+/*1. Quantitat de registres de la taula de vols: */
+SELECT count(*) 
+FROM usairlineflights2.flights;
+
+/*2. Retard promig de sortida i arribada segons l’aeroport origen. */
+SELECT origin, avg(ArrDelay), avg(DepDelay)
+FROM usairlineflights2.flights
+GROUP BY origin;
+
+/*3. Retard promig d’arribada dels vols, per mesos, anys i segons l’aeroport origen.. */
+SELECT origin, colYear, colMonth, avg(ArrDelay)
+FROM usairlineflights2.flights
+GROUP BY origin, colYear, colMonth
+ORDER BY origin, colYear, colMonth;
+
+/*4. Retard promig d’arribada dels vols, per mesos, anys i segons l’aeroport origen (mateixa consulta que
+abans i amb el mateix ordre). Però a més, ara volen que en comptes del codi de l’aeroport es mostri
+el nom de la ciutat.
+ */
+SELECT usairports.City, colYear, colMonth, avg(ArrDelay)
+FROM usairlineflights2.flights
+INNER JOIN usairlineflights2.usairports
+ON flights.origin = usairports.IATA
+GROUP BY City, colYear, colMonth
+ORDER BY City, colYear, colMonth;
+
+/*5. Les companyies amb més vols cancelats, per mesos i any. A més, han d’estar ordenades de forma
+que les companyies amb més cancel·lacions apareguin les primeres.
+ */
+ 
+SELECT UniqueCarrier, colYear, colMonth, COUNT(flightID) as total_cancelled
+FROM usairlineflights2.flights
+WHERE Cancelled !=0
+GROUP BY UniqueCarrier, colYear, colMonth
+ORDER BY total_cancelled DESC;
+
+/*6. L’identificador dels 10 avions que més distància han recorregut fent vols..
+Sino, el TailNUM NULL sortia en la primera posicio */
+
+SELECT TailNum, SUM(distance) as totalDistance
+FROM usairlineflights2.flights
+WHERE TailNum is not null or TailNum !=''
+GROUP BY TailNum
+ORDER BY  totalDistance DESC
+LIMIT 10 OFFSET 1;
+
+/*7. Companyies amb el seu retard promig només d’aquelles les quals els seus vols arriben al seu destí
+amb un retràs promig major de 10 minuts */
+SELECT UniqueCarrier, AVG(ArrDelay) as avgDelay
+FROM usairlineflights2.flights
+WHERE Cancelled = 0
+GROUP BY UniqueCarrier
+HAVING AVG(ArrDelay)> 10
+ORDER BY avgDelay DESC;
+
+
+
+
+
